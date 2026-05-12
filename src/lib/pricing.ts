@@ -41,7 +41,7 @@ export function calcRoomPriceTotal(params: {
 
 export function calcTotal(params: {
   room: RoomInfo | null;
-  policy: PolicyOption | null;
+  policy: PolicyOption[] | null;
   checkInYmd: string;
   checkOutYmd: string;
   guests: number;
