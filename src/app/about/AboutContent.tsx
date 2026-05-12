@@ -64,8 +64,20 @@ export default function AboutContent({
           <div className="max-w-[1050px] mx-auto px-8 text-center">
             <p className={`${labelClass} mb-6`}>About</p>
 
-            <h2 className="text-[2rem] sm:text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-tight break-keep">
-  CHUJADO ECO HOUSE
+            <h2 className="font-black tracking-tighter mb-8 leading-tight break-keep">
+  
+  {/* 모바일 */}
+  <span className="block sm:hidden text-[2rem]">
+    CHUJADO
+    <br />
+    ECO HOUSE
+  </span>
+
+  {/* PC */}
+  <span className="hidden sm:block text-4xl md:text-6xl">
+    CHUJADO ECO HOUSE
+  </span>
+
 </h2>
 
 <p className="text-base sm:text-lg md:text-xl text-slate-500 leading-[2] mb-16 break-keep">
