@@ -1,5 +1,10 @@
 import { PolicyOption, RoomInfo } from "@/lib/sheets";
 
+export function parseYmd(value: string): Date {
+  const [y, m, d] = value.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export function isWeekend(date: Date) {
   const day = date.getDay();
   return day === 5 || day === 6;
