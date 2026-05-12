@@ -1,42 +1,44 @@
 import { PolicyOption, RoomInfo } from "@/lib/sheets";
 
 export function isWeekend(date: Date) {
-  // Treat Fri/Sat as weekend (common for Korean lodging pricing)
-  const day = date.getDay(); // 0 Sun .. 6 Sat
+  const day = date.getDay();
   return day === 5 || day === 6;
 }
 
-export function parseYmd(ymd: string): Date | null {
-  // expect YYYY-MM-DD
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd.trim());
-  if (!m) return null;
-  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-  return Number.isNaN(d.getTime()) ? null : d;
+export function getNights(checkInYmd: string, checkOutYmd: string) {
+  if (!checkInYmd || !checkOutYmd) return 0;
+
+  const start = new Date(`${checkInYmd}T00:00:00`);
+  const end = new Date(`${checkOutYmd}T00:00:00`);
+  const diff = end.getTime() - start.getTime();
+
+  return Math.max(Math.ceil(diff / (1000 * 60 * 60 * 24)), 0);
 }
 
-export function diffNights(checkInYmd: string, checkOutYmd: string) {
-  const a = parseYmd(checkInYmd);
-  const b = parseYmd(checkOutYmd);
-  if (!a || !b) return 0;
-  const ms = b.getTime() - a.getTime();
-  const nights = Math.floor(ms / (1000 * 60 * 60 * 24));
-  return Math.max(0, nights);
+function parseCapacity(capacity: string) {
+  const nums = capacity.match(/\d+/g)?.map(Number) || [];
+
+  return {
+    basePeople: nums[0] || 2,
+    maxPeople: nums[1] || nums[0] || 4,
+  };
 }
 
-export function calcRoomPriceTotal(params: {
-  room: RoomInfo;
-  checkInYmd: string;
-  nights: number;
-}) {
-  const start = parseYmd(params.checkInYmd);
-  if (!start || params.nights <= 0) return 0;
-  let total = 0;
-  for (let i = 0; i < params.nights; i++) {
-    const d = new Date(start);
-    d.setDate(d.getDate() + i);
-    total += isWeekend(d) ? params.room.weekendPrice : params.room.weekdayPrice;
-  }
-  return total;
+function getPolicyPrice(
+  policy: PolicyOption[] | null,
+  keyword: string,
+  fallback: number
+) {
+  const found = policy?.find((item) => {
+    return (
+      item.category?.includes(keyword) ||
+      item.item?.includes(keyword) ||
+      item.note?.includes(keyword) ||
+      item.info?.includes(keyword)
+    );
+  });
+
+  return found?.price || fallback;
 }
 
 export function calcTotal(params: {
@@ -47,22 +49,56 @@ export function calcTotal(params: {
   guests: number;
   mealPeople: number;
 }) {
-  if (!params.room || !params.policy) {
-    return { nights: 0, roomTotal: 0, extraTotal: 0, mealTotal: 0, grandTotal: 0 };
+  const nights = getNights(params.checkInYmd, params.checkOutYmd);
+
+  if (!params.room || nights <= 0) {
+    return {
+      nights,
+      roomTotal: 0,
+      extraPeople: 0,
+      extraTotal: 0,
+      mealTotal: 0,
+      grandTotal: 0,
+    };
   }
 
-  const nights = diffNights(params.checkInYmd, params.checkOutYmd);
-  const roomTotal = calcRoomPriceTotal({
-    room: params.room,
-    checkInYmd: params.checkInYmd,
-    nights
-  });
+  const capacity = parseCapacity(params.room.capacity);
 
-  const extraPeople = Math.max(0, params.guests - params.room.basePeople);
-  const extraTotal = extraPeople * params.policy.extraPersonPricePerNight * nights;
-  const mealTotal = Math.max(0, params.mealPeople) * params.policy.mealPricePerPerson;
+  const extraPersonPricePerNight = getPolicyPrice(
+    params.policy,
+    "추가",
+    20000
+  );
+
+  const mealPricePerPerson = getPolicyPrice(
+    params.policy,
+    "식사",
+    10000
+  );
+
+  let roomTotal = 0;
+
+  const current = new Date(`${params.checkInYmd}T00:00:00`);
+
+  for (let i = 0; i < nights; i++) {
+    roomTotal += isWeekend(current)
+      ? params.room.weekendPrice
+      : params.room.weekdayPrice;
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  const extraPeople = Math.max(0, params.guests - capacity.basePeople);
+  const extraTotal = extraPeople * extraPersonPricePerNight * nights;
+  const mealTotal = Math.max(0, params.mealPeople) * mealPricePerPerson;
   const grandTotal = roomTotal + extraTotal + mealTotal;
 
-  return { nights, roomTotal, extraTotal, mealTotal, grandTotal };
+  return {
+    nights,
+    roomTotal,
+    extraPeople,
+    extraTotal,
+    mealTotal,
+    grandTotal,
+  };
 }
-
