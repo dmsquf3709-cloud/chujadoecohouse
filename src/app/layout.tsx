@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/navbar"; // 상단바 불러오기
+import Navbar from "@/components/Navbar"; // 상단바 불러오기
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
