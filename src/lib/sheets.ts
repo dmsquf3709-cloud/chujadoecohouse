@@ -42,13 +42,13 @@ function getEnv(name: string): string {
 }
 
 // 3. 숫자 변환 유틸
-function toNum(v: any): number {
+function toNum(v: unknown): number {
   if (!v) return 0;
   return Number(String(v).replace(/[^0-9.-]/g, "")) || 0;
 }
 
 // 4. 공통 시트 호출 함수
-async function fetchSheetData(range: string) {
+async function fetchSheetData(range: string): Promise<string[][]> {
   const apiKey = getEnv("NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY");
   const sheetId = getEnv("NEXT_PUBLIC_GOOGLE_SHEETS_ID");
 
@@ -100,8 +100,8 @@ export async function getInformations(): Promise<RoomInfo[]> {
 /** 오시는 길 정보 */
 export async function getDirectionInfo(): Promise<DirectionInfo | null> {
   const rows = await fetchSheetData("informations!A2:O");
+  const row = rows.find((r: string[]) => r[1]?.toString().trim() === "오시는 길");
 
-  const row = rows.find((r) => r[1]?.toString().trim() === "오시는 길");
 
   if (!row) return null;
 
