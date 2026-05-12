@@ -64,16 +64,17 @@ export default function AboutContent({
           <div className="max-w-[1050px] mx-auto px-8 text-center">
             <p className={`${labelClass} mb-6`}>About</p>
 
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 whitespace-nowrap">
-              CHUJADO ECO HOUSE
-            </h2>
+            <h2 className="text-[2rem] sm:text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-tight break-keep">
+  CHUJADO ECO HOUSE
+</h2>
 
-            <p className="text-lg md:text-xl text-slate-500 leading-[2] mb-16 break-keep">
-              자연과 바다가 머무는 조용한 공간,
-              추자도 에코하우스입니다.
-            </p>
+<p className="text-base sm:text-lg md:text-xl text-slate-500 leading-[2] mb-16 break-keep">
+  자연과 바다가 머무는 조용한 공간,
+  <br />
+  추자도 에코하우스입니다.
+</p>
 
-            <div className="space-y-10 text-[1.05rem] md:text-[1.12rem] leading-[2.2] text-slate-600 break-keep">
+<div className="space-y-8 md:space-y-10 text-[0.95rem] sm:text-[1.05rem] md:text-[1.12rem] leading-[2.1] md:leading-[2.2] text-slate-600 break-keep">
               <p className="whitespace-pre-wrap">{mainText.trim()}</p>
 
               {subText && (
