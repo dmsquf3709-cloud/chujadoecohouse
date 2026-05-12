@@ -1,4 +1,4 @@
-import { PolicyOptions, RoomInfo } from "@/lib/sheets";
+import { PolicyOption, RoomInfo } from "@/lib/sheets";
 
 export function isWeekend(date: Date) {
   // Treat Fri/Sat as weekend (common for Korean lodging pricing)
